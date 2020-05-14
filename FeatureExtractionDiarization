@@ -4,38 +4,27 @@
 # information from a corresponding rttm diarization infromation file.
 #######################################################################################
 
-form Extract pitch data from labelled points
-   sentence Directory_name: /home/eydishm/Documents/Audioexamples/ProsodyProfiling
-   sentence Objects_name: 5004310T0
-   sentence Log_file Pitch_4065
-   positive Labeled_tier_number 1
-   positive Analysis_points_time_step 0.01
-   positive Record_with_precision 1
-   comment From sound to pitch:
-   positive Pitch_analysis_time_step 0.005
-   positive Minimum_pitch 80
-   positive Maximum_pitch 300
-endform
 
-# directoryname: /home/
+# directoryname: all from current directory
 #objects_name: 5004310T0
 #sentence Objects_name: rttm
-files$ =  directory_name$ + "/" + objects_name$
+# files$ =  directory_name$ + "/" + sound_objects_name$
 
 
 # Remove for batch running, deleting if testing on the same file
 # deleteFile: "Features5004310T0.txt"
 header_row$ =  "Time" + tab$ + "Pitch" + tab$ + "HarmAC" +  tab$ +  "HarmCC" + tab$ + "Intensity" + tab$ + "Speaker" + newline$ 
-header_row$ > files& + ".txt"
+header_row$ > "Features5004310T0.txt"
 
 # Read information from rttm file
-Read Strings from raw text file: 'files& '.rttm
+#Read Strings from raw text file: directory_name$ + "/" + diarization_objects_name$ + ".rttm"
+Read Strings from raw text file: "5004310T0.rttm"
 numberOfStrings = Get number of strings
 
 for stringNumber from 1 to numberOfStrings
      string$ = Get string: stringNumber 
 
-# removing 5 strings containing <NA>, WARNING this is not reliable might need to review for strings with some <NA> and some not that we need
+# removing 5 columns of the rttm file containing <NA>, WARNING this is not reliable might need to review for strings with some <NA> and some not that we need
 	stringNA$=replace$( string$," <NA>", "",5)
 # Removing all strings before the actual numbers appear
 	lengthAll=length(stringNA$)
