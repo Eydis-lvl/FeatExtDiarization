@@ -1,0 +1,113 @@
+# Authour: Eydis Huld Magnusdottir
+# RLS 05/2020
+# This script extracts Pitch, Harmonic features with ac and cc methods and Intensity information from a audio file and adds speaker 
+# information from a corresponding rttm diarization infromation file.
+#######################################################################################
+
+form Extract pitch data from labelled points
+   sentence Directory_name: /home/eydishm/Documents/Audioexamples/ProsodyProfiling
+   sentence Objects_name: 5004310T0
+   sentence Log_file Pitch_4065
+   positive Labeled_tier_number 1
+   positive Analysis_points_time_step 0.01
+   positive Record_with_precision 1
+   comment From sound to pitch:
+   positive Pitch_analysis_time_step 0.005
+   positive Minimum_pitch 80
+   positive Maximum_pitch 300
+endform
+
+# directoryname: /home/
+#objects_name: 5004310T0
+#sentence Objects_name: rttm
+files$ =  directory_name$ + "/" + objects_name$
+
+
+# Remove for batch running, deleting if testing on the same file
+# deleteFile: "Features5004310T0.txt"
+header_row$ =  "Time" + tab$ + "Pitch" + tab$ + "HarmAC" +  tab$ +  "HarmCC" + tab$ + "Intensity" + tab$ + "Speaker" + newline$ 
+header_row$ > files& + ".txt"
+
+# Read information from rttm file
+Read Strings from raw text file: 'files& '.rttm
+numberOfStrings = Get number of strings
+
+for stringNumber from 1 to numberOfStrings
+     string$ = Get string: stringNumber 
+
+# removing 5 strings containing <NA>, WARNING this is not reliable might need to review for strings with some <NA> and some not that we need
+	stringNA$=replace$( string$," <NA>", "",5)
+# Removing all strings before the actual numbers appear
+	lengthAll=length(stringNA$)
+	timeStartIndex = index(stringNA$,"5004310T0")
+	lengthIndex= length ("5004310T0")
+	stringTimeNA$ = right$ (stringNA$, lengthAll-timeStartIndex-lengthIndex)
+# Extracting the start of period of speech timing
+	start [stringNumber]=number(stringTimeNA$)
+# Removing the start of period of speech timing
+	lengthS=index(stringTimeNA$," ")
+	lengthA=length(stringTimeNA$)
+	stringTimeNA$ = right$ (stringTimeNA$, lengthA-lengthS)
+# Extracting duration of speehc period
+	dur[stringNumber] =number(stringTimeNA$)
+# Removing the duration period of speech leaving speaker information 	
+	lengthS=index(stringTimeNA$," ")
+	lengthA=length(stringTimeNA$)
+	stringSpeaker$ [stringNumber] = right$ (stringTimeNA$, lengthA-lengthS)
+endfor
+
+# Read audio file
+#Read from file... 'directoryname$''objects_name$'.wav
+Read from file... 5004310T0.wav
+
+
+# Extract features
+sound = selected ("Sound")
+tmin= Get start time
+tmax = Get end time
+
+To Pitch: 0, 75, 600 
+Rename: "pitch"
+
+selectObject: sound
+To Harmonicity (ac):  0.01, 75, 0.1, 4.5
+Rename: "harmac"
+
+selectObject: sound
+To Harmonicity (cc):  0.01, 75, 0.1, 4.5
+Rename: "harmcc"
+
+selectObject: sound
+To Intensity:  75, 0.001
+Rename: "intensity"
+
+# Extract all information into .txt file
+start[numberOfStrings+1]=tmax
+i=1
+time=tmin
+
+for k from 1 to numberOfStrings
+repeat 
+	selectObject:  "Pitch pitch"
+	pitch = Get value at time:  time, "Hertz", "Linear"
+	selectObject: "Harmonicity harmac"
+	harmac = Get value at time: time, "Cubic"
+	selectObject: "Harmonicity harmcc"
+	harmcc = Get value at time: time, "Cubic"
+	selectObject: "Intensity intensity"
+	intensity=Get value at time: time, "Cubic"
+
+if time <start[k] + dur[k] 
+	speaker$ = stringSpeaker$ [k]
+ 	appendFile: "Features5004310T0.txt",  fixed$ (time,3), tab$ , fixed$ (pitch,3), tab$, fixed$ (harmac,3), tab$, fixed$ (harmcc,3),  tab$, fixed$ (intensity,3), tab$,  speaker$, newline$
+	time = tmin + i* 0.01
+	i=i+1
+else
+	appendFile: "Features5004310T0.txt", fixed$ (time,3), tab$ , fixed$ (pitch,3), tab$, fixed$ (harmac,3), tab$, fixed$ (harmcc,3),  tab$, fixed$ (intensity,3), tab$,  "Sil",  newline$
+	time = tmin + i* 0.01
+	i=i+1
+endif
+until  start[k+1]< time
+endfor
+
+
