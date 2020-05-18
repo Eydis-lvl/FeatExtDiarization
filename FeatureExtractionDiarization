@@ -4,22 +4,33 @@
 # information from a corresponding rttm diarization infromation file.
 #######################################################################################
 
+# see http://www.fon.hum.uva.nl/praat/manual/Create_Strings_as_file_list___.html
+directory$ = "/home/eydishm/Documents/Audioexamples/ProsodyProfiling"
+strings = Create Strings as file list: "list", directory$ + "/*.wav"
+numberOfFiles = Get number of strings
+writeInfoLine: numberOfFiles
+for ifile to numberOfFiles
+    selectObject: strings
+    wavfileName$ = Get string: ifile
+    Read from file: directory$ + "/" + wavfileName$
+    appendInfoLine: wavfileName$
+endfor
 
-# directoryname: all from current directory
-#objects_name: 5004310T0
-#sentence Objects_name: rttm
-# files$ =  directory_name$ + "/" + sound_objects_name$
+fileName$ = wavfileName$ - ".wav"
 
+rttmfileName$ =  fileName$+".rttm"
+txtfileName$ = "Features"+fileName$+".txt"
+appendInfoLine: txtfileName$
 
 # Remove for batch running, deleting if testing on the same file
 # deleteFile: "Features5004310T0.txt"
 header_row$ =  "Time" + tab$ + "Pitch" + tab$ + "HarmAC" +  tab$ +  "HarmCC" + tab$ + "Intensity" + tab$ + "Speaker" + newline$ 
-header_row$ > "Features5004310T0.txt"
+header_row$ > txtfileName$
 
 # Read information from rttm file
-#Read Strings from raw text file: directory_name$ + "/" + diarization_objects_name$ + ".rttm"
-Read Strings from raw text file: "5004310T0.rttm"
+Read Strings from raw text file: rttmfileName$
 numberOfStrings = Get number of strings
+appendInfoLine: numberOfStrings
 
 for stringNumber from 1 to numberOfStrings
      string$ = Get string: stringNumber 
@@ -28,8 +39,8 @@ for stringNumber from 1 to numberOfStrings
 	stringNA$=replace$( string$," <NA>", "",5)
 # Removing all strings before the actual numbers appear
 	lengthAll=length(stringNA$)
-	timeStartIndex = index(stringNA$,"5004310T0")
-	lengthIndex= length ("5004310T0")
+	timeStartIndex = index(stringNA$,fileName$ )
+	lengthIndex= length (fileName$ )
 	stringTimeNA$ = right$ (stringNA$, lengthAll-timeStartIndex-lengthIndex)
 # Extracting the start of period of speech timing
 	start [stringNumber]=number(stringTimeNA$)
@@ -46,8 +57,7 @@ for stringNumber from 1 to numberOfStrings
 endfor
 
 # Read audio file
-#Read from file... 'directoryname$''objects_name$'.wav
-Read from file... 5004310T0.wav
+Read from file: wavfileName$
 
 
 # Extract features
@@ -88,11 +98,11 @@ repeat
 
 if time <start[k] + dur[k] 
 	speaker$ = stringSpeaker$ [k]
- 	appendFile: "Features5004310T0.txt",  fixed$ (time,3), tab$ , fixed$ (pitch,3), tab$, fixed$ (harmac,3), tab$, fixed$ (harmcc,3),  tab$, fixed$ (intensity,3), tab$,  speaker$, newline$
+ 	appendFile: txtfileName$,  fixed$ (time,3), tab$ , fixed$ (pitch,3), tab$, fixed$ (harmac,3), tab$, fixed$ (harmcc,3),  tab$, fixed$ (intensity,3), tab$,  speaker$, newline$
 	time = tmin + i* 0.01
 	i=i+1
 else
-	appendFile: "Features5004310T0.txt", fixed$ (time,3), tab$ , fixed$ (pitch,3), tab$, fixed$ (harmac,3), tab$, fixed$ (harmcc,3),  tab$, fixed$ (intensity,3), tab$,  "Sil",  newline$
+	appendFile: txtfileName$, fixed$ (time,3), tab$ , fixed$ (pitch,3), tab$, fixed$ (harmac,3), tab$, fixed$ (harmcc,3),  tab$, fixed$ (intensity,3), tab$,  "Sil",  newline$
 	time = tmin + i* 0.01
 	i=i+1
 endif
