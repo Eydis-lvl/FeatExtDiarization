@@ -5,22 +5,21 @@
 #######################################################################################
 
 # see http://www.fon.hum.uva.nl/praat/manual/Create_Strings_as_file_list___.html
-directory$ = "/home/eydishm/Documents/Audioexamples/ProsodyProfiling"
+directory$ = "/home/eydis/kaldi/egs/prosody/PraatDiar/FeatExtDiarization" 
+# TODO make this a callable option or pwd
+# TODO make the user be able to choose the features.
 strings = Create Strings as file list: "list", directory$ + "/*.wav"
 numberOfFiles = Get number of strings
-writeInfoLine: numberOfFiles
 for ifile to numberOfFiles
     selectObject: strings
     wavfileName$ = Get string: ifile
     Read from file: directory$ + "/" + wavfileName$
-    appendInfoLine: wavfileName$
 endfor
+# TODO make this work for multiple files by adding to end
 
 fileName$ = wavfileName$ - ".wav"
-
 rttmfileName$ =  fileName$+".rttm"
 txtfileName$ = "Features"+fileName$+".txt"
-appendInfoLine: txtfileName$
 
 # Remove for batch running, deleting if testing on the same file
 # deleteFile: "Features5004310T0.txt"
