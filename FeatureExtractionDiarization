@@ -1,36 +1,31 @@
 # Authour: Eydis Huld Magnusdottir
 # RLS 05/2020
-# This script extracts Pitch, Harmonic features with ac and cc methods and Intensity information from a audio file and adds speaker 
+# This script extracts Pitch, Harmonicity and Intensity information from a audio file and adds speaker 
 # information from a corresponding rttm diarization infromation file.
 #######################################################################################
 
-# see http://www.fon.hum.uva.nl/praat/manual/Create_Strings_as_file_list___.html
-directory$ = "/home/eydishm/Documents/Audioexamples/ProsodyProfiling"
+directory$ = "/home/eydis/kaldi/egs/prosody/PraatDiar/FeatExtDiarization" 
+# TODO make dir a callable option or pwd
+
 strings = Create Strings as file list: "list", directory$ + "/*.wav"
 numberOfFiles = Get number of strings
-writeInfoLine: numberOfFiles
 for ifile to numberOfFiles
     selectObject: strings
     wavfileName$ = Get string: ifile
     Read from file: directory$ + "/" + wavfileName$
-    appendInfoLine: wavfileName$
-endfor
 
-fileName$ = wavfileName$ - ".wav"
-
-rttmfileName$ =  fileName$+".rttm"
+fileName$ = wavfileName$-".wav"
+rttmfileName$ = fileName$+".rttm"
 txtfileName$ = "Features"+fileName$+".txt"
-appendInfoLine: txtfileName$
+# TODO make this optional
+deleteFile: txtfileName$
 
-# Remove for batch running, deleting if testing on the same file
-# deleteFile: "Features5004310T0.txt"
-header_row$ =  "Time" + tab$ + "Pitch" + tab$ + "HarmAC" +  tab$ +  "HarmCC" + tab$ + "Intensity" + tab$ + "Speaker" + newline$ 
-header_row$ > txtfileName$
+header_row$ =  "Time" + tab$ + "Pitch" + tab$ + "HarmAC" + tab$ + "Intensity" + tab$ + "Speaker" + newline$ 
+appendFile: txtfileName$, header_row$
 
 # Read information from rttm file
 Read Strings from raw text file: rttmfileName$
 numberOfStrings = Get number of strings
-appendInfoLine: numberOfStrings
 
 for stringNumber from 1 to numberOfStrings
      string$ = Get string: stringNumber 
@@ -59,7 +54,6 @@ endfor
 # Read audio file
 Read from file: wavfileName$
 
-
 # Extract features
 sound = selected ("Sound")
 tmin= Get start time
@@ -71,10 +65,6 @@ Rename: "pitch"
 selectObject: sound
 To Harmonicity (ac):  0.01, 75, 0.1, 4.5
 Rename: "harmac"
-
-selectObject: sound
-To Harmonicity (cc):  0.01, 75, 0.1, 4.5
-Rename: "harmcc"
 
 selectObject: sound
 To Intensity:  75, 0.001
@@ -91,22 +81,20 @@ repeat
 	pitch = Get value at time:  time, "Hertz", "Linear"
 	selectObject: "Harmonicity harmac"
 	harmac = Get value at time: time, "Cubic"
-	selectObject: "Harmonicity harmcc"
-	harmcc = Get value at time: time, "Cubic"
 	selectObject: "Intensity intensity"
 	intensity=Get value at time: time, "Cubic"
 
 if time <start[k] + dur[k] 
 	speaker$ = stringSpeaker$ [k]
- 	appendFile: txtfileName$,  fixed$ (time,3), tab$ , fixed$ (pitch,3), tab$, fixed$ (harmac,3), tab$, fixed$ (harmcc,3),  tab$, fixed$ (intensity,3), tab$,  speaker$, newline$
+ 	appendFile: txtfileName$,  fixed$ (time,3), tab$ , fixed$ (pitch,3), tab$, fixed$ (harmac,3), tab$, fixed$ (intensity,3), tab$,  speaker$, newline$
 	time = tmin + i* 0.01
 	i=i+1
 else
-	appendFile: txtfileName$, fixed$ (time,3), tab$ , fixed$ (pitch,3), tab$, fixed$ (harmac,3), tab$, fixed$ (harmcc,3),  tab$, fixed$ (intensity,3), tab$,  "Sil",  newline$
+	appendFile: txtfileName$, fixed$ (time,3), tab$ , fixed$ (pitch,3), tab$, fixed$ (harmac,3), tab$, fixed$ (intensity,3), tab$,  "Sil",  newline$
 	time = tmin + i* 0.01
 	i=i+1
 endif
 until  start[k+1]< time
 endfor
-
+endfor
 
