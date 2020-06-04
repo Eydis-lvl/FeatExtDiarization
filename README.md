@@ -1,5 +1,5 @@
 # Prosody feature extraction with speaker information
-This Praat script is designed as a module based on the output of the diarization annotation tool dscore. The script takes as input a audio file and a corresponding .rttm file with speaker annotations. The script calculates the prosodic features Pitch, Harmioncity and Intensity from the audio input. The features extracted are collected in time steps of 0.01 seconds, paired with the corresponding speaker information from the .rttm file. The output is stored in a Features\<filename>.txt file. Features are extracted for the entire audio file and recorded for voiced as well as unvoiced sections.
+This Praat script is designed as a module based on the output of the diarization annotation tool dscore. The script takes as input a audio file and a corresponding .rttm file with speaker annotations. The script calculates the prosodic features Pitch, Harmioncity and Intensity from the audio input. The features extracted are collected in time steps of 0.01 seconds, paired with the corresponding speaker information from the .rttm file. The output is stored in a \<filename>Features.txt file. Features are extracted for the entire audio file and recorded for voiced as well as unvoiced sections.
 
 ## Requirements
 * Praat non GUI version is sufficient
@@ -32,6 +32,17 @@ Output is a .txt file containing information
 			6.520	132.410		6.091	80.373		SpeakerTag1
 
 			
+## Running the script
+
+For Linux terminal, first the path to Praat and then the command --run followed by the script name in double quotation marks.
+
+		/home/eydis/bin/praat --run "FED.praat"
+
+For more information e.g. for Mac or Windows see the Praat manual.  https://www.fon.hum.uva.nl/praat/manual/Scripting_6_9__Calling_from_the_command_line.html 
+
+The assumption is that all the input files are in current directory set by the Praat built in variable shellDirectory$. 
+
+
 ### Credits
 
 Developer
@@ -46,6 +57,3 @@ This is part of the Language Technology Program by The Icelandic Government thro
 
 ### Licence
 Apache 2.0
-
-
-
