@@ -4,10 +4,14 @@
 # information from a corresponding rttm diarization infromation file.
 #######################################################################################
 
+<<<<<<< HEAD
 form Directory
  	text i_directory 
 endform
 
+=======
+i_directory$ = shellDirectory$
+>>>>>>> 12100256608b4c5485d7b54555d7764a83e8ac10
 strings = Create Strings as file list: "list", i_directory$ + "/*.wav"
 numberOfFiles = Get number of strings
 
@@ -26,7 +30,11 @@ for ifile to numberOfFiles
 	appendFile: txtfileName$, header_row$
 
 	# Read information from rttm file
+<<<<<<< HEAD
 	Read Strings from raw text file: i_directory$ + "/" + rttmfileName$
+=======
+	Read Strings from raw text file: rttmfileName$
+>>>>>>> 12100256608b4c5485d7b54555d7764a83e8ac10
 	numberOfStrings = Get number of strings
 
 	for stringNumber from 1 to numberOfStrings
@@ -54,7 +62,11 @@ for ifile to numberOfFiles
 	endfor
 
 	# Read audio file
+<<<<<<< HEAD
 	Read from file: i_directory$ + "/" + wavfileName$
+=======
+	Read from file: wavfileName$
+>>>>>>> 12100256608b4c5485d7b54555d7764a83e8ac10
 
 	# Extract features
 	sound = selected ("Sound")
